@@ -1,10 +1,26 @@
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
-from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
-from adafruit_hid.keycode import Keycode
 import time
 import digitalio
 from board import *
+
+
+PLATFORM = "win"
+LANG = "fr"
+
+
+try:
+    keyboard_layout = __import__("keyboard_layout_{}_{}".format(PLATFORM, LANG))
+    KeyboardLayout = keyboard_layout.KeyboardLayout
+except ImportError:
+    from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
+
+try:
+    keycode_module = __import__("keycode_{}_{}".format(PLATFORM, LANG))
+    Keycode = keycode_module.Keycode
+except ImportError:
+    from adafruit_hid.keycode import Keycode
+
 
 duckyCommands = {
     'WINDOWS': Keycode.WINDOWS, 'GUI': Keycode.GUI,
@@ -74,7 +90,7 @@ def parseLine(line):
         runScriptLine(newScriptLine)
 
 kbd = Keyboard(usb_hid.devices)
-layout = KeyboardLayoutUS(kbd)
+layout = KeyboardLayout(kbd)
 
 # sleep at the start to allow the device to be recognized by the host computer
 time.sleep(.5)
